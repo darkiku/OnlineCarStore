@@ -1,34 +1,39 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Store - Интернет-магазин автомобилей</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Car Store - Online Car Marketplace</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
     <div class="container">
-        <h1>Car Store</h1>
+        <div class="header-content">
+            <h1>Car Store</h1>
+            <div id="auth-container" class="auth-buttons">
+                <!-- Auth buttons will be inserted via JavaScript -->
+            </div>
+        </div>
         <nav>
-            <button id="catalog-btn" class="nav-btn active">Каталог</button>
+            <button id="catalog-btn" class="nav-btn active">Catalog</button>
             <button id="garage-btn" class="nav-btn">
-                Мой гараж <span id="garage-count" class="badge">0</span>
+                My Garage <span id="garage-count" class="badge">0</span>
             </button>
-            <button id="add-car-btn" class="nav-btn">+ Добавить авто</button>
+            <button id="add-car-btn" class="nav-btn">+ Add Car</button>
         </nav>
     </div>
 </header>
 
 <main class="container">
-    <!-- Страница каталога -->
+    <!-- Catalog Page -->
     <div id="catalog-page" class="page active">
         <div class="filters">
-            <h2>Фильтры</h2>
+            <h2>Filters</h2>
             <div class="filter-group">
-                <label>Марка</label>
+                <label>Make</label>
                 <select id="filter-make">
-                    <option value="">Все марки</option>
+                    <option value="">All Makes</option>
                     <option value="Toyota">Toyota</option>
                     <option value="BMW">BMW</option>
                     <option value="Mercedes">Mercedes</option>
@@ -36,167 +41,271 @@
                     <option value="Volkswagen">Volkswagen</option>
                     <option value="Honda">Honda</option>
                     <option value="Ford">Ford</option>
+                    <option value="Lexus">Lexus</option>
+                    <option value="Nissan">Nissan</option>
+                    <option value="Mazda">Mazda</option>
                 </select>
             </div>
 
             <div class="filter-group">
-                <label>Тип кузова</label>
+                <label>Body Type</label>
                 <select id="filter-body">
-                    <option value="">Все типы</option>
-                    <option value="Седан">Седан</option>
-                    <option value="Хэтчбек">Хэтчбек</option>
-                    <option value="Внедорожник">Внедорожник</option>
-                    <option value="Купе">Купе</option>
-                    <option value="Универсал">Универсал</option>
+                    <option value="">All Types</option>
+                    <option value="Sedan">Sedan</option>
+                    <option value="Hatchback">Hatchback</option>
+                    <option value="SUV">SUV</option>
+                    <option value="Coupe">Coupe</option>
+                    <option value="Wagon">Wagon</option>
+                    <option value="Crossover">Crossover</option>
+                    <option value="Minivan">Minivan</option>
                 </select>
             </div>
 
             <div class="filter-group">
-                <label>Тип топлива</label>
+                <label>Fuel Type</label>
                 <select id="filter-fuel">
-                    <option value="">Все типы</option>
-                    <option value="Бензин">Бензин</option>
-                    <option value="Дизель">Дизель</option>
-                    <option value="Электро">Электро</option>
-                    <option value="Гибрид">Гибрид</option>
+                    <option value="">All Types</option>
+                    <option value="Gasoline">Gasoline</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Electric">Electric</option>
+                    <option value="Hybrid">Hybrid</option>
                 </select>
             </div>
 
             <div class="filter-group">
-                <label>Коробка передач</label>
+                <label>Transmission</label>
                 <select id="filter-transmission">
-                    <option value="">Все типы</option>
-                    <option value="Автомат">Автомат</option>
-                    <option value="Механика">Механика</option>
-                    <option value="Робот">Робот</option>
+                    <option value="">All Types</option>
+                    <option value="Automatic">Automatic</option>
+                    <option value="Manual">Manual</option>
+                    <option value="Robot">Robot</option>
+                    <option value="CVT">CVT</option>
                 </select>
             </div>
 
             <div class="filter-group">
-                <label>Цена от</label>
+                <label>Price From</label>
                 <input type="number" id="filter-price-min" placeholder="0">
             </div>
 
             <div class="filter-group">
-                <label>Цена до</label>
+                <label>Price To</label>
                 <input type="number" id="filter-price-max" placeholder="10000000">
             </div>
 
-            <button id="apply-filters" class="btn btn-primary">Применить фильтры</button>
-            <button id="reset-filters" class="btn btn-secondary">Сбросить</button>
+            <button id="apply-filters" class="btn btn-primary">Apply Filters</button>
+            <button id="reset-filters" class="btn btn-secondary">Reset</button>
         </div>
 
         <div class="cars-container">
-            <h2>Доступные автомобили</h2>
+            <h2>Available Cars</h2>
             <div id="cars-list" class="cars-grid"></div>
         </div>
     </div>
 
-    <!-- Страница гаража -->
+    <!-- Garage Page -->
     <div id="garage-page" class="page">
-        <h2>Мой гараж - Сравнение автомобилей</h2>
+        <h2>My Garage - Compare Cars</h2>
         <div id="garage-empty" class="empty-state">
-            <p>Ваш гараж пуст. Добавьте автомобили из каталога для сравнения.</p>
+            <p>Your garage is empty. Add cars from the catalog for comparison.</p>
         </div>
         <div id="garage-compare" class="compare-container" style="display: none;">
             <div id="garage-cars" class="compare-grid"></div>
         </div>
     </div>
 
-    <!-- Страница добавления авто -->
+    <!-- Add Car Page -->
     <div id="add-car-page" class="page">
-        <h2>Добавить новый автомобиль</h2>
+        <h2>Add New Car</h2>
+        <p class="form-description">Fill out the form to add a car to the catalog</p>
         <form id="add-car-form" class="car-form">
             <div class="form-row">
                 <div class="form-group">
-                    <label>Марка *</label>
-                    <input type="text" name="make" required>
+                    <label>Make *</label>
+                    <input type="text" name="make" required placeholder="Toyota">
                 </div>
                 <div class="form-group">
-                    <label>Модель *</label>
-                    <input type="text" name="model" required>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Год *</label>
-                    <input type="number" name="year" min="1900" max="2026" required>
-                </div>
-                <div class="form-group">
-                    <label>Цена * (₸)</label>
-                    <input type="number" name="price" min="0" step="1000" required>
+                    <label>Model *</label>
+                    <input type="text" name="model" required placeholder="Camry">
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Пробег (км)</label>
-                    <input type="number" name="mileage" min="0">
+                    <label>Year *</label>
+                    <input type="number" name="year" min="1900" max="2026" required placeholder="2024">
                 </div>
                 <div class="form-group">
-                    <label>Мощность (л.с.)</label>
-                    <input type="number" name="horsepower" min="0">
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Объем двигателя (л)</label>
-                    <input type="number" name="engine_size" step="0.1" min="0">
-                </div>
-                <div class="form-group">
-                    <label>Цвет</label>
-                    <input type="text" name="color">
+                    <label>Price * ($)</label>
+                    <input type="number" name="price" min="0" step="1000" required placeholder="25000">
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Тип кузова</label>
-                    <select name="body_type">
-                        <option value="Седан">Седан</option>
-                        <option value="Хэтчбек">Хэтчбек</option>
-                        <option value="Внедорожник">Внедорожник</option>
-                        <option value="Купе">Купе</option>
-                        <option value="Универсал">Универсал</option>
+                    <label>Mileage (km)</label>
+                    <input type="number" name="mileage" min="0" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Horsepower (hp)</label>
+                    <input type="number" name="horsepower" min="0" placeholder="249">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Engine Size (L)</label>
+                    <input type="number" name="engine_size" step="0.1" min="0" placeholder="2.5">
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <input type="text" name="color" placeholder="Black">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Body Type *</label>
+                    <select name="body_type" required>
+                        <option value="">Select Type</option>
+                        <option value="Sedan">Sedan</option>
+                        <option value="Hatchback">Hatchback</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Coupe">Coupe</option>
+                        <option value="Wagon">Wagon</option>
+                        <option value="Crossover">Crossover</option>
+                        <option value="Minivan">Minivan</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Тип топлива</label>
-                    <select name="fuel_type">
-                        <option value="Бензин">Бензин</option>
-                        <option value="Дизель">Дизель</option>
-                        <option value="Электро">Электро</option>
-                        <option value="Гибрид">Гибрид</option>
+                    <label>Fuel Type *</label>
+                    <select name="fuel_type" required>
+                        <option value="">Select Type</option>
+                        <option value="Gasoline">Gasoline</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="Electric">Electric</option>
+                        <option value="Hybrid">Hybrid</option>
                     </select>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Коробка передач</label>
-                    <select name="transmission">
-                        <option value="Автомат">Автомат</option>
-                        <option value="Механика">Механика</option>
-                        <option value="Робот">Робот</option>
+                    <label>Transmission *</label>
+                    <select name="transmission" required>
+                        <option value="">Select Type</option>
+                        <option value="Automatic">Automatic</option>
+                        <option value="Manual">Manual</option>
+                        <option value="Robot">Robot</option>
+                        <option value="CVT">CVT</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>URL изображения</label>
-                    <input type="url" name="image_url" placeholder="https://...">
+                    <label>Image URL</label>
+                    <input type="url" name="image_url" placeholder="https://example.com/car.jpg">
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Описание</label>
-                <textarea name="description" rows="4"></textarea>
+                <label>Description</label>
+                <textarea name="description" rows="4" placeholder="Describe the car's features..."></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary">Добавить автомобиль</button>
+            <button type="submit" class="btn btn-primary btn-large">Add Car</button>
         </form>
     </div>
+
+    <!-- Edit Car Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2>Edit Car</h2>
+            <form id="edit-car-form" class="car-form">
+                <input type="hidden" id="edit-car-id">
+                <div class="form-group">
+                    <label>Make *</label>
+                    <input type="text" id="edit-make" required>
+                </div>
+                <div class="form-group">
+                    <label>Model *</label>
+                    <input type="text" id="edit-model" required>
+                </div>
+                <div class="form-group">
+                    <label>Year *</label>
+                    <input type="number" id="edit-year" min="1900" max="2026" required>
+                </div>
+                <div class="form-group">
+                    <label>Price * ($)</label>
+                    <input type="number" id="edit-price" min="0" step="1000" required>
+                </div>
+                <div class="form-group">
+                    <label>Mileage (km)</label>
+                    <input type="number" id="edit-mileage" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Horsepower (hp)</label>
+                    <input type="number" id="edit-horsepower" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Engine Size (L)</label>
+                    <input type="number" id="edit-engine-size" step="0.1" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <input type="text" id="edit-color">
+                </div>
+                <div class="form-group">
+                    <label>Body Type *</label>
+                    <select id="edit-body-type" required>
+                        <option value="">Select Type</option>
+                        <option value="Sedan">Sedan</option>
+                        <option value="Hatchback">Hatchback</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Coupe">Coupe</option>
+                        <option value="Wagon">Wagon</option>
+                        <option value="Crossover">Crossover</option>
+                        <option value="Minivan">Minivan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fuel Type *</label>
+                    <select id="edit-fuel-type" required>
+                        <option value="">Select Type</option>
+                        <option value="Gasoline">Gasoline</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="Electric">Electric</option>
+                        <option value="Hybrid">Hybrid</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Transmission *</label>
+                    <select id="edit-transmission" required>
+                        <option value="">Select Type</option>
+                        <option value="Automatic">Automatic</option>
+                        <option value="Manual">Manual</option>
+                        <option value="Robot">Robot</option>
+                        <option value="CVT">CVT</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="url" id="edit-image-url">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="edit-description" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-large">Save Changes</button>
+            </form>
+        </div>
+    </div>
 </main>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2024 Car Store. All rights reserved.</p>
+    </div>
+</footer>
 
 <script src="app.js"></script>
 </body>

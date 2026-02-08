@@ -10,14 +10,13 @@ import (
 	"github.com/teamserik/online-car-store/internal/config"
 	"github.com/teamserik/online-car-store/internal/database"
 	"github.com/teamserik/online-car-store/internal/handler"
+	"github.com/teamserik/online-car-store/internal/middleware"
 	"github.com/teamserik/online-car-store/internal/repository"
 )
 
 func main() {
-	// Загрузка конфигурации
 	cfg := config.Load()
 
-	// Подключение к MongoDB
 	client, err := database.ConnectMongoDB(cfg.MongoURI)
 	if err != nil {
 		log.Fatal(err)
@@ -30,40 +29,42 @@ func main() {
 		}
 	}()
 
-	// Получение коллекции
 	carsCollection := database.GetCollection(client, cfg.DatabaseName, "cars")
-	carRepo := repository.NewMongoCarRepository(carsCollection)
+	usersCollection := database.GetCollection(client, cfg.DatabaseName, "users")
 
-	// Настройка роутов
+	carRepo := repository.NewMongoCarRepository(carsCollection)
+	userRepo := repository.NewMongoUserRepository(usersCollection)
+
 	mux := http.NewServeMux()
 
-	// API endpoints
-	mux.HandleFunc("POST /api/cars", handler.CreateCar(carRepo))
+	// Auth endpoints
+	mux.HandleFunc("POST /api/auth/register", handler.Register(userRepo))
+	mux.HandleFunc("POST /api/auth/login", handler.Login(userRepo))
+	mux.HandleFunc("GET /api/auth/profile", middleware.AuthMiddleware(handler.GetProfile(userRepo)))
+
+	// Car endpoints
 	mux.HandleFunc("GET /api/cars", handler.ListCars(carRepo))
 	mux.HandleFunc("GET /api/cars/", handler.GetCar(carRepo))
-	mux.HandleFunc("PUT /api/cars/", handler.UpdateCar(carRepo))
-	mux.HandleFunc("DELETE /api/cars/", handler.DeleteCar(carRepo))
+	mux.HandleFunc("POST /api/cars", middleware.AuthMiddleware(handler.CreateCar(carRepo)))
+	mux.HandleFunc("PUT /api/cars/", middleware.AuthMiddleware(handler.UpdateCar(carRepo)))
+	mux.HandleFunc("DELETE /api/cars/", middleware.AuthMiddleware(handler.DeleteCar(carRepo)))
 
-	// Статические файлы для фронтенда
 	fs := http.FileServer(http.Dir("./static"))
 	mux.Handle("/", fs)
 
-	// CORS middleware
 	corsHandler := enableCORS(mux)
 
-	// Запуск сервера
 	addr := ":" + cfg.ServerPort
 	fmt.Printf("Car Store API running on %s\n", addr)
 	fmt.Printf("MongoDB Database: %s\n", cfg.DatabaseName)
 	log.Fatal(http.ListenAndServe(addr, corsHandler))
 }
 
-// CORS middleware
 func enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)

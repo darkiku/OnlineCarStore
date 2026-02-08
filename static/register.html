@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Car Store</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="header-content">
+            <h1>Car Store</h1>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <div class="auth-container">
+        <h2>Register</h2>
+        <div id="error-message" class="error-message"></div>
+        <div id="success-message" class="success-message"></div>
+        <form id="register-form" class="auth-form">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username" required placeholder="Choose a username">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" required placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" required placeholder="Choose a password" minlength="6">
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" id="confirm-password" required placeholder="Confirm your password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">Register</button>
+        </form>
+        <div class="auth-links">
+            <p>Already have an account? <a href="login.html">Login here</a></p>
+            <p><a href="index.html">Back to Home</a></p>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2024 Car Store. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+    const API_URL = 'http://localhost:9000/api';
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+
+        errorMessage.style.display = 'none';
+        successMessage.style.display = 'none';
+
+        if (password !== confirmPassword) {
+            errorMessage.textContent = 'Passwords do not match!';
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, email, password })
+            });
+
+            if (response.ok) {
+                successMessage.textContent = 'Registration successful! Redirecting to login...';
+                successMessage.style.display = 'block';
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            } else {
+                const error = await response.text();
+                errorMessage.textContent = 'Registration failed: ' + error;
+                errorMessage.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            errorMessage.textContent = 'An error occurred. Please try again.';
+            errorMessage.style.display = 'block';
+        }
+    });
+</script>
+</body>
+</html>

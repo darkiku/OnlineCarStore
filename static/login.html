@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Car Store</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="header-content">
+            <h1>Car Store</h1>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <div class="auth-container">
+        <h2>Login</h2>
+        <div id="error-message" class="error-message"></div>
+        <form id="login-form" class="auth-form">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username" required placeholder="Enter your username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" required placeholder="Enter your password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">Login</button>
+        </form>
+        <div class="auth-links">
+            <p>Don't have an account? <a href="register.html">Register here</a></p>
+            <p><a href="index.html">Back to Home</a></p>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2024 Car Store. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+    const API_URL = 'http://localhost:9000/api';
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorMessage = document.getElementById('error-message');
+
+        try {
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = 'index.html';
+            } else {
+                const error = await response.text();
+                errorMessage.textContent = 'Login failed: ' + error;
+                errorMessage.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            errorMessage.textContent = 'An error occurred. Please try again.';
+            errorMessage.style.display = 'block';
+        }
+    });
+</script>
+</body>
+</html>
