@@ -109,22 +109,30 @@ func (r *mongoCarRepository) List(ctx context.Context, filter *model.FilterParam
 	return cars, nil
 }
 
+// Изменено: теперь обновляет все поля
 func (r *mongoCarRepository) Update(ctx context.Context, id string, input model.UpdateCarInput) error {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
 
-	update := bson.M{"$set": bson.M{"updated_at": time.Now()}}
-
-	if input.Price != nil {
-		update["$set"].(bson.M)["price"] = *input.Price
-	}
-	if input.Mileage != nil {
-		update["$set"].(bson.M)["mileage"] = *input.Mileage
-	}
-	if input.Description != nil {
-		update["$set"].(bson.M)["description"] = *input.Description
+	update := bson.M{
+		"$set": bson.M{
+			"make":         input.Make,
+			"model":        input.Model,
+			"year":         input.Year,
+			"price":        input.Price,
+			"mileage":      input.Mileage,
+			"body_type":    input.BodyType,
+			"fuel_type":    input.FuelType,
+			"transmission": input.Transmission,
+			"color":        input.Color,
+			"horsepower":   input.HorsePower,
+			"engine_size":  input.EngineSize,
+			"description":  input.Description,
+			"image_url":    input.ImageURL,
+			"updated_at":   time.Now(),
+		},
 	}
 
 	_, err = r.collection.UpdateOne(ctx, bson.M{"_id": objectID}, update)

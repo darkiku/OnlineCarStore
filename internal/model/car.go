@@ -1,8 +1,9 @@
 package model
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Car struct {
@@ -13,11 +14,11 @@ type Car struct {
 	Price        float64            `bson:"price" json:"price"`
 	Mileage      int                `bson:"mileage" json:"mileage"`
 	BodyType     string             `bson:"body_type" json:"body_type"`
-	FuelType     string             `bson:"fuel_type" json:"fuel_type"`       // Бензин, Дизель, Электро
-	Transmission string             `bson:"transmission" json:"transmission"` // Автомат, Механика
+	FuelType     string             `bson:"fuel_type" json:"fuel_type"`
+	Transmission string             `bson:"transmission" json:"transmission"`
 	Color        string             `bson:"color" json:"color"`
 	HorsePower   int                `bson:"horsepower" json:"horsepower"`
-	EngineSize   float64            `bson:"engine_size" json:"engine_size"` // литры
+	EngineSize   float64            `bson:"engine_size" json:"engine_size"`
 	Description  string             `bson:"description" json:"description"`
 	ImageURL     string             `bson:"image_url" json:"image_url"`
 	CreatedAt    time.Time          `bson:"created_at" json:"created_at"`
@@ -40,10 +41,21 @@ type CreateCarInput struct {
 	ImageURL     string  `json:"image_url"`
 }
 
+// Изменено: теперь UpdateCarInput содержит все поля
 type UpdateCarInput struct {
-	Price       *float64 `json:"price,omitempty"`
-	Mileage     *int     `json:"mileage,omitempty"`
-	Description *string  `json:"description,omitempty"`
+	Make         string  `json:"make"`
+	Model        string  `json:"model"`
+	Year         int     `json:"year"`
+	Price        float64 `json:"price"`
+	Mileage      int     `json:"mileage"`
+	BodyType     string  `json:"body_type"`
+	FuelType     string  `json:"fuel_type"`
+	Transmission string  `json:"transmission"`
+	Color        string  `json:"color"`
+	HorsePower   int     `json:"horsepower"`
+	EngineSize   float64 `json:"engine_size"`
+	Description  string  `json:"description"`
+	ImageURL     string  `json:"image_url"`
 }
 
 type FilterParams struct {
