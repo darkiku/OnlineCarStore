@@ -1,150 +1,131 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"strings"
-	"sync/atomic"
 
 	"github.com/teamserik/online-car-store/internal/model"
 	"github.com/teamserik/online-car-store/internal/repository"
 )
 
-var viewCount int64 // атомарный счётчик просмотров (для горутины)
-
 func CreateCar(repo repository.CarRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
 		var input model.CreateCarInput
 		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-			respondError(w, http.StatusBadRequest, "Invalid JSON")
-			return
-		}
-
-		// минимальная проверка
-		if input.Make == "" || input.Model == "" || input.Year < 1900 || input.Price <= 0 {
-			respondError(w, http.StatusBadRequest, "Required fields missing or invalid")
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		car := &model.Car{
-			Make:        input.Make,
-			Model:       input.Model,
-			Year:        input.Year,
-			Price:       input.Price,
-			Mileage:     input.Mileage,
-			BodyType:    input.BodyType,
-			Description: input.Description,
+			Make:         input.Make,
+			Model:        input.Model,
+			Year:         input.Year,
+			Price:        input.Price,
+			Mileage:      input.Mileage,
+			BodyType:     input.BodyType,
+			FuelType:     input.FuelType,
+			Transmission: input.Transmission,
+			Color:        input.Color,
+			HorsePower:   input.HorsePower,
+			EngineSize:   input.EngineSize,
+			Description:  input.Description,
+			ImageURL:     input.ImageURL,
 		}
 
-		repo.Create(car)
-		respondJSON(w, http.StatusCreated, car)
+		ctx := context.Background()
+		if err := repo.Create(ctx, car); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(car)
 	}
 }
 
 func ListCars(repo repository.CarRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		var filter model.FilterParams
+
+		// Парсинг query параметров для фильтрации
+		query := r.URL.Query()
+
+		if make := query.Get("make"); make != "" {
+			filter.Make = &make
+		}
+		if bodyType := query.Get("body_type"); bodyType != "" {
+			filter.BodyType = &bodyType
+		}
+		if fuelType := query.Get("fuel_type"); fuelType != "" {
+			filter.FuelType = &fuelType
+		}
+		if transmission := query.Get("transmission"); transmission != "" {
+			filter.Transmission = &transmission
+		}
+
+		ctx := context.Background()
+		cars, err := repo.List(ctx, &filter)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		cars := repo.List()
-		respondJSON(w, http.StatusOK, cars)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(cars)
 	}
 }
 
 func GetCar(repo repository.CarRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-			return
-		}
+		id := strings.TrimPrefix(r.URL.Path, "/api/cars/")
 
-		idStr := strings.TrimPrefix(r.URL.Path, "/api/cars/")
-		id, err := strconv.Atoi(idStr)
+		ctx := context.Background()
+		car, err := repo.GetByID(ctx, id)
 		if err != nil {
-			respondError(w, http.StatusBadRequest, "Invalid car ID")
+			http.Error(w, "Car not found", http.StatusNotFound)
 			return
 		}
 
-		car, found := repo.GetByID(id)
-		if !found {
-			respondError(w, http.StatusNotFound, "Car not found")
-			return
-		}
-
-		atomic.AddInt64(&viewCount, 1) // для статистики в фоне
-		respondJSON(w, http.StatusOK, car)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(car)
 	}
 }
 
 func UpdateCar(repo repository.CarRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
-		idStr := strings.TrimPrefix(r.URL.Path, "/api/cars/")
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			respondError(w, http.StatusBadRequest, "Invalid car ID")
-			return
-		}
+		id := strings.TrimPrefix(r.URL.Path, "/api/cars/")
 
 		var input model.UpdateCarInput
 		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-			respondError(w, http.StatusBadRequest, "Invalid JSON")
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		if !repo.Update(id, input) {
-			respondError(w, http.StatusNotFound, "Car not found")
+		ctx := context.Background()
+		if err := repo.Update(ctx, id, input); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		// Можно вернуть обновлённый объект, но для простоты — 200 OK
-		respondJSON(w, http.StatusOK, map[string]string{"message": "Car updated"})
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Car updated successfully"})
 	}
 }
 
 func DeleteCar(repo repository.CarRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		id := strings.TrimPrefix(r.URL.Path, "/api/cars/")
+
+		ctx := context.Background()
+		if err := repo.Delete(ctx, id); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		idStr := strings.TrimPrefix(r.URL.Path, "/api/cars/")
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			respondError(w, http.StatusBadRequest, "Invalid car ID")
-			return
-		}
-
-		// Добавь метод Delete в repository
-		if !repo.Delete(id) {
-			respondError(w, http.StatusNotFound, "Car not found")
-			return
-		}
-
-		respondJSON(w, http.StatusOK, map[string]string{"message": "Car deleted"})
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Car deleted successfully"})
 	}
-}
-
-// ────────────────────────────────────────────────
-func respondJSON(w http.ResponseWriter, status int, data any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(data)
-}
-
-func respondError(w http.ResponseWriter, status int, msg string) {
-	respondJSON(w, status, map[string]string{"error": msg})
 }
