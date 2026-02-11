@@ -17,6 +17,7 @@ type UserRepository interface {
 	FindByID(ctx context.Context, id primitive.ObjectID) (*model.User, error)
 	FindByUsername(ctx context.Context, username string) (*model.User, error)
 	Update(ctx context.Context, id primitive.ObjectID, user *model.User) error
+	GetUserByID(ctx context.Context, id primitive.ObjectID) (*model.User, error)
 }
 
 type MongoUserRepository struct {
@@ -103,4 +104,9 @@ func (r *MongoUserRepository) Update(ctx context.Context, id primitive.ObjectID,
 	}
 
 	return nil
+}
+
+// GetUserByID is an alias for FindByID (for consistency with review handler)
+func (r *MongoUserRepository) GetUserByID(ctx context.Context, id primitive.ObjectID) (*model.User, error) {
+	return r.FindByID(ctx, id)
 }
