@@ -20,7 +20,10 @@
             <button id="garage-btn" class="nav-btn">
                 My Garage <span id="garage-count" class="badge">0</span>
             </button>
-            <button id="add-car-btn" class="nav-btn">+ Add Car</button>
+            <button id="favorites-btn" class="nav-btn">
+                Favorites <span id="favorites-count" class="badge">0</span>
+            </button>
+            <button id="add-car-btn" class="nav-btn">Add Car</button>
         </nav>
     </div>
 </header>
@@ -99,19 +102,20 @@
 
         <div class="cars-container">
             <h2>Available Cars</h2>
-            <div id="cars-list" class="cars-grid"></div>
+            <div id="cars-container" class="cars-grid"></div>
         </div>
     </div>
 
     <!-- Garage Page -->
     <div id="garage-page" class="page">
         <h2>My Garage - Compare Cars</h2>
-        <div id="garage-empty" class="empty-state">
-            <p>Your garage is empty. Add cars from the catalog for comparison.</p>
-        </div>
-        <div id="garage-compare" class="compare-container" style="display: none;">
-            <div id="garage-cars" class="compare-grid"></div>
-        </div>
+        <div id="garage-container" class="cars-grid"></div>
+    </div>
+
+    <!-- Favorites Page -->
+    <div id="favorites-page" class="page">
+        <h2>My Favorite Cars</h2>
+        <div id="favorites-container" class="cars-grid"></div>
     </div>
 
     <!-- Add Car Page -->
@@ -122,51 +126,40 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Make *</label>
-                    <input type="text" name="make" required placeholder="Toyota">
+                    <input type="text" id="car-make" required placeholder="Toyota">
                 </div>
                 <div class="form-group">
                     <label>Model *</label>
-                    <input type="text" name="model" required placeholder="Camry">
+                    <input type="text" id="car-model" required placeholder="Camry">
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label>Year *</label>
-                    <input type="number" name="year" min="1900" max="2026" required placeholder="2024">
+                    <input type="number" id="car-year" min="1900" max="2026" required placeholder="2024">
                 </div>
                 <div class="form-group">
                     <label>Price * ($)</label>
-                    <input type="number" name="price" min="0" step="1000" required placeholder="25000">
+                    <input type="number" id="car-price" min="0" step="1000" required placeholder="25000">
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label>Mileage (km)</label>
-                    <input type="number" name="mileage" min="0" placeholder="0">
+                    <input type="number" id="car-mileage" min="0" placeholder="0">
                 </div>
                 <div class="form-group">
                     <label>Horsepower (hp)</label>
-                    <input type="number" name="horsepower" min="0" placeholder="249">
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Engine Size (L)</label>
-                    <input type="number" name="engine_size" step="0.1" min="0" placeholder="2.5">
-                </div>
-                <div class="form-group">
-                    <label>Color</label>
-                    <input type="text" name="color" placeholder="Black">
+                    <input type="number" id="car-horsepower" min="0" placeholder="200">
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label>Body Type *</label>
-                    <select name="body_type" required>
+                    <select id="car-body" required>
                         <option value="">Select Type</option>
                         <option value="Sedan">Sedan</option>
                         <option value="Hatchback">Hatchback</option>
@@ -179,7 +172,7 @@
                 </div>
                 <div class="form-group">
                     <label>Fuel Type *</label>
-                    <select name="fuel_type" required>
+                    <select id="car-fuel" required>
                         <option value="">Select Type</option>
                         <option value="Gasoline">Gasoline</option>
                         <option value="Diesel">Diesel</option>
@@ -192,7 +185,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Transmission *</label>
-                    <select name="transmission" required>
+                    <select id="car-transmission" required>
                         <option value="">Select Type</option>
                         <option value="Automatic">Automatic</option>
                         <option value="Manual">Manual</option>
@@ -201,111 +194,39 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Image URL</label>
-                    <input type="url" name="image_url" placeholder="https://example.com/car.jpg">
+                    <label>Color *</label>
+                    <input type="text" id="car-color" required placeholder="White">
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Engine Size (L)</label>
+                    <input type="number" id="car-engine" step="0.1" min="0" placeholder="2.0">
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="url" id="car-image" placeholder="https://example.com/car.jpg">
+                </div>
+            </div>
+
+            <div class="form-group full-width">
                 <label>Description</label>
-                <textarea name="description" rows="4" placeholder="Describe the car's features..."></textarea>
+                <textarea id="car-description" rows="4" placeholder="Describe the car..."></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-large">Add Car</button>
+            <button type="submit" class="btn btn-success">Add Car</button>
         </form>
-    </div>
-
-    <!-- Edit Car Modal -->
-    <div id="edit-modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close">&times;</span>
-            <h2>Edit Car</h2>
-            <form id="edit-car-form" class="car-form">
-                <input type="hidden" id="edit-car-id">
-                <div class="form-group">
-                    <label>Make *</label>
-                    <input type="text" id="edit-make" required>
-                </div>
-                <div class="form-group">
-                    <label>Model *</label>
-                    <input type="text" id="edit-model" required>
-                </div>
-                <div class="form-group">
-                    <label>Year *</label>
-                    <input type="number" id="edit-year" min="1900" max="2026" required>
-                </div>
-                <div class="form-group">
-                    <label>Price * ($)</label>
-                    <input type="number" id="edit-price" min="0" step="1000" required>
-                </div>
-                <div class="form-group">
-                    <label>Mileage (km)</label>
-                    <input type="number" id="edit-mileage" min="0">
-                </div>
-                <div class="form-group">
-                    <label>Horsepower (hp)</label>
-                    <input type="number" id="edit-horsepower" min="0">
-                </div>
-                <div class="form-group">
-                    <label>Engine Size (L)</label>
-                    <input type="number" id="edit-engine-size" step="0.1" min="0">
-                </div>
-                <div class="form-group">
-                    <label>Color</label>
-                    <input type="text" id="edit-color">
-                </div>
-                <div class="form-group">
-                    <label>Body Type *</label>
-                    <select id="edit-body-type" required>
-                        <option value="">Select Type</option>
-                        <option value="Sedan">Sedan</option>
-                        <option value="Hatchback">Hatchback</option>
-                        <option value="SUV">SUV</option>
-                        <option value="Coupe">Coupe</option>
-                        <option value="Wagon">Wagon</option>
-                        <option value="Crossover">Crossover</option>
-                        <option value="Minivan">Minivan</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Fuel Type *</label>
-                    <select id="edit-fuel-type" required>
-                        <option value="">Select Type</option>
-                        <option value="Gasoline">Gasoline</option>
-                        <option value="Diesel">Diesel</option>
-                        <option value="Electric">Electric</option>
-                        <option value="Hybrid">Hybrid</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Transmission *</label>
-                    <select id="edit-transmission" required>
-                        <option value="">Select Type</option>
-                        <option value="Automatic">Automatic</option>
-                        <option value="Manual">Manual</option>
-                        <option value="Robot">Robot</option>
-                        <option value="CVT">CVT</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Image URL</label>
-                    <input type="url" id="edit-image-url">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="edit-description" rows="4"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary btn-large">Save Changes</button>
-            </form>
-        </div>
     </div>
 </main>
 
-<footer>
-    <div class="container">
-        <p>&copy; 2024 Car Store. All rights reserved.</p>
+<!-- Reviews Modal -->
+<div id="reviews-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('reviews-modal')">&times;</span>
+        <div id="reviews-content"></div>
     </div>
-</footer>
+</div>
 
 <script src="app.js"></script>
 </body>
