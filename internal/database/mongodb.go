@@ -26,7 +26,7 @@ func ConnectMongoDB(uri string) (*mongo.Client, error) {
 		return nil, fmt.Errorf("failed to ping MongoDB: %w", err)
 	}
 
-	log.Println("Successfully connected to MongoDB Atlas!")
+	log.Println("Successfully connected to MongoDB (localhost:27017)!")
 	return client, nil
 }
 
